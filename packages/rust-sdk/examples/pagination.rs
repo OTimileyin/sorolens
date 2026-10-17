@@ -47,16 +47,8 @@ fn main() {
 async fn run() -> Result<(), Error> {
     if self_test() {
         let server = httpmock::MockServer::start_async().await;
-        server
-            .mock_async(|when, then| {
-                when.method(httpmock::Method::GET)
-                    .path("/api/v1/contracts")
-                    .query_param("limit", "2");
-                then.status(200)
-                    .header("content-type", "application/json")
-                    .body(PAGE_1);
-            })
-            .await;
+        // Register the cursor mock first: a request carrying a cursor also matches
+        // the limit-only mock, and the first registered match wins.
         server
             .mock_async(|when, then| {
                 when.method(httpmock::Method::GET)
@@ -65,6 +57,16 @@ async fn run() -> Result<(), Error> {
                 then.status(200)
                     .header("content-type", "application/json")
                     .body(PAGE_2);
+            })
+            .await;
+        server
+            .mock_async(|when, then| {
+                when.method(httpmock::Method::GET)
+                    .path("/api/v1/contracts")
+                    .query_param("limit", "2");
+                then.status(200)
+                    .header("content-type", "application/json")
+                    .body(PAGE_1);
             })
             .await;
 
