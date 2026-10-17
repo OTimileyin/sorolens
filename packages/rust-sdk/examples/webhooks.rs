@@ -100,7 +100,10 @@ fn parse_signature_header(header: &str) -> Result<(i64, Vec<String>), Box<dyn st
             _ => {}
         }
     }
-    Ok((timestamp.ok_or("missing timestamp in signature header")?, signatures))
+    Ok((
+        timestamp.ok_or("missing timestamp in signature header")?,
+        signatures,
+    ))
 }
 
 fn hex_decode(value: &str) -> Result<Vec<u8>, Box<dyn std::error::Error>> {
